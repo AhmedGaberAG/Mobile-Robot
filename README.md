@@ -89,25 +89,6 @@ A complete differential-drive robot designed in **SolidWorks** and integrated in
 
 The CAD model includes the mechanical structure, wheels, motors, sensor mounts, electronics mounting components, and supporting assemblies.
 
-### CAD Components
-
-```text
-diff_bot.SLDASM
-│
-├── Base Assembly
-├── Base Plate
-├── Side Plates
-├── Top Plate
-├── PCB Assembly
-├── PCB Plate
-├── Camera Stand
-├── LiDAR Stand
-├── Motor Adapters
-├── Wheels
-├── DC Motors
-└── Caster Wheels
-```
-
 ### CAD → ROS 2
 
 ```text
