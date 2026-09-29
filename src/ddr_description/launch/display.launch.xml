@@ -1,10 +1,10 @@
 <launch>
 
     <let name="urdf_path"
-         value="$(find-pkg-share ddr_description)/urdf/ddr_robot.urdf.xacro" />
+         value="$(find-pkg-share ddr_description)/urdf/ddr_description.urdf.xacro" />
 
     <let name="rviz_path"
-         value="$(find-pkg-share ddr_description)/rviz/ddr_robot_description.rviz" />
+         value="$(find-pkg-share ddr_description)/rviz/ddr_description.rviz" />
 
     <node pkg="robot_state_publisher"
           exec="robot_state_publisher">

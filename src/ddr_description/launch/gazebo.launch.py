@@ -25,13 +25,23 @@ def generate_launch_description():
     # Package paths
     ddr_description = get_package_share_directory("ddr_description")
 
+    rviz_path = os.path.join(get_package_share_directory("ddr_description"),
+                          "rviz",
+                          "ddr_description.rviz"
+                        )
+
+    gz_sim = os.path.join(get_package_share_directory("ros_gz_sim"),
+                          "launch",
+                          "gz_sim.launch.py"
+                        )
+
     # Launch arguments
     model_arg = DeclareLaunchArgument(
         name="model",
         default_value=os.path.join(
             ddr_description,
             "urdf",
-            "ddr_robot.urdf.xacro",
+            "ddr_description.urdf.xacro",
         ),
         description="Absolute path to robot Xacro file",
     )
@@ -65,13 +75,7 @@ def generate_launch_description():
     )
 
     # Robot description
-    robot_description = ParameterValue(
-        Command([
-                "xacro ",
-                LaunchConfiguration("model"),
-            ]),
-        value_type=str,
-    )
+    robot_description = ParameterValue(Command(["xacro ", LaunchConfiguration("model"),]), value_type=str)
 
     # Robot State Publisher
     robot_state_publisher_node = Node(
@@ -86,15 +90,9 @@ def generate_launch_description():
 
     # Gazebo Sim
     gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory("ros_gz_sim"),
-                "launch",
-                "gz_sim.launch.py",
-            )
-        ),
-        launch_arguments={ 
-            "gz_args": PythonExpression(["'", world_path, " -v 4 -r'", ])}.items(),
+        PythonLaunchDescriptionSource(gz_sim),
+        launch_arguments={"gz_args": PythonExpression([
+                          "'", world_path, " -v 4 -r'", ])}.items()
     )
 
     # Spawn robot into Gazebo
@@ -103,11 +101,9 @@ def generate_launch_description():
         executable="create",
         output="screen",
         arguments=[
-            "-topic",
-            "robot_description",
-            "-name",
-            "ddr_robot",
-        ],
+            "-topic", "robot_description",
+            "-name", "ddr_robot",
+        ]
     )
 
     # Gazebo <-> ROS 2 bridge
@@ -115,10 +111,9 @@ def generate_launch_description():
         package="ros_gz_bridge",
         executable="parameter_bridge",
         output="screen",
-        parameters=[{
-            "config_file": bridge_config,
-        }],
+        parameters=[{"config_file": bridge_config}]
     )
+
     # Controller spawners
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
@@ -127,8 +122,8 @@ def generate_launch_description():
         arguments=[
             "joint_state_broadcaster",
             "--controller-manager",
-            "/controller_manager",
-        ],
+            "/controller_manager"
+        ]
     )
     # simple_velocity_controller_spawner = Node( 
     #     package="controller_manager", 
@@ -137,10 +132,10 @@ def generate_launch_description():
     #     arguments=[ 
     #         "simple_velocity_controller", 
     #         "--controller-manager", 
-    #         "/controller_manager", 
-    #         ], 
+    #         "/controller_manager" 
+    #         ]
     #     )
-    # DDR controller spawner
+    # ddr controller spawner
     ddr_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -148,42 +143,46 @@ def generate_launch_description():
         arguments=[
             "ddr_controller",
             "--controller-manager",
-            "/controller_manager",
-        ],
+            "/controller_manager"
+        ]
     )
     # Start controllers after robot is spawned
     load_joint_state_broadcaster = RegisterEventHandler(
         OnProcessExit(
             target_action=gz_spawn_entity,
-            on_exit=[
-                joint_state_broadcaster_spawner,
-            ],
+            on_exit=[joint_state_broadcaster_spawner]
         )
     )
     load_ddr_controller = RegisterEventHandler(
         OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
-            on_exit=[
-                ddr_controller_spawner,
-            ],
+            on_exit=[ddr_controller_spawner]
         )
     )
 
+    rviz2_node = Node(
+        package="rviz2",
+        executable="rviz2",
+        arguments=['-d' , rviz_path],
+        output="screen"
+    )
     # Launch description
     return LaunchDescription([
-            # Arguments
-            model_arg,
-            world_name_arg,
-            # Environment
-            gazebo_resource_path,
-            # Robot
-            robot_state_publisher_node,
-            # Simulation
-            gazebo,
-            gz_spawn_entity,
-            # ROS 2 interfaces
-            gz_ros2_bridge,
-            # Controllers
-            load_joint_state_broadcaster,
-            load_ddr_controller,
-        ])
+        # Arguments
+        model_arg,
+        world_name_arg,
+        # Environment
+        gazebo_resource_path,
+        # Robot
+        robot_state_publisher_node,
+        # Simulation
+        gazebo,
+        gz_spawn_entity,
+        # ROS 2 interfaces
+        gz_ros2_bridge,
+        # Controllers
+        load_joint_state_broadcaster,
+        load_ddr_controller,
+        #rviz2
+        rviz2_node
+    ])

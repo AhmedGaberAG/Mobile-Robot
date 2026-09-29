@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source /opt/ros/humble/setup.bash
-source ~/robot_description_ws/install/setup.bash
+source ~/mobile_ws/install/setup.bash
 
 TOPIC=/ddr_controller/cmd_vel_unstamped
 

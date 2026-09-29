@@ -1,8 +1,8 @@
-# ROS 2 Robot Description & Digital Twin
+# ROS 2 Mobile Robot — Description & Digital Twin
 
 **From robot modeling and CAD design to a fully simulated ROS 2 digital twin.**
 
-This workspace demonstrates a complete robotics simulation workflow using **ROS 2 Humble, URDF/Xacro, TF2, RViz2, Gazebo Sim, ros2_control, SolidWorks, and simulated sensors.**
+This repository demonstrates a complete mobile-robot simulation workflow using **ROS 2 Humble, URDF/Xacro, TF2, RViz2, Gazebo Sim, ros2_control, SolidWorks, and simulated sensors.**
 
 ---
 
@@ -14,7 +14,7 @@ This workspace demonstrates a complete robotics simulation workflow using **ROS 
 
 ### Differential-Drive — CAD Digital Twin
 
-![DDR Demo](media/diff_demo.gif)
+![Differential Drive](media/diff_demo.gif)
 
 ![CAD Demo](media/diff_animation_cad_demo.gif)
 
@@ -22,14 +22,14 @@ This workspace demonstrates a complete robotics simulation workflow using **ROS 
 
 ## 🚀 Project Overview
 
-The workspace contains two stages of the same differential-drive robotics workflow:
+The repository contains two stages of the same differential-drive robotics workflow:
 
 | Project                    | Description                                                                    |
 | -------------------------- | ------------------------------------------------------------------------------ |
 | **DDR Basic**              | Primitive-based ROS 2 robot for developing and validating the simulation stack |
 | **Differential-Drive CAD** | SolidWorks-based robot integrated into ROS 2 as a complete digital twin        |
 
-The workflow:
+### Workflow
 
 ```text
 CAD / Robot Design
@@ -57,7 +57,7 @@ CAD / Robot Design
 
 ![DDR Robot](media/ddr.png)
 
-A primitive-geometry differential-drive robot used to build and validate the ROS 2 robot-description and simulation pipeline.
+A primitive-geometry differential-drive robot used to develop and validate the ROS 2 robot-description and simulation pipeline.
 
 ### Features
 
@@ -79,13 +79,47 @@ A primitive-geometry differential-drive robot used to build and validate the ROS
 * Sensor validation
 * Multiple Gazebo worlds
 
+### Robot Description
+
+```text
+ddr_description/
+├── urdf/
+│   ├── ddr_description.urdf.xacro
+│   ├── properties.xacro
+│   ├── gazebo.xacro
+│   └── ros2_control.xacro
+├── config/
+├── launch/
+├── rviz/
+├── scripts/
+├── worlds/
+└── frames/
+```
+
+### Robot Frames
+
+```text
+odom
+└── base_footprint
+    └── base_link
+        ├── right_wheel_link
+        ├── left_wheel_link
+        ├── caster_wheel_link
+        ├── laser_link
+        ├── camera_link
+        │   └── camera_optical_frame
+        └── imu_link
+```
+
+[View TF2 Frame Graph](src/ddr_description/frames/frames.pdf)
+
 ---
 
 # 🤖 02 — Differential-Drive CAD Digital Twin
 
 ![Differential Drive](media/diff.png)
 
-A complete differential-drive robot designed in **SolidWorks** and integrated into ROS 2.
+A complete differential-drive mobile robot designed in **SolidWorks** and integrated into ROS 2.
 
 The CAD model includes the mechanical structure, wheels, motors, sensor mounts, electronics mounting components, and supporting assemblies.
 
@@ -111,9 +145,7 @@ ros2_control
 ROS 2 Digital Twin
 ```
 
----
-
-# 🧩 Robot Description
+### Robot Description
 
 The CAD robot uses a modular Xacro architecture:
 
@@ -176,7 +208,13 @@ Main command interface:
 /diff_controller/cmd_vel_unstamped
 ```
 
-The controller publishes odometry and the `odom → base_footprint` transform.
+The controller publishes odometry and the:
+
+```text
+odom → base_footprint
+```
+
+transform.
 
 ---
 
@@ -192,14 +230,43 @@ Sensor data is generated in Gazebo and bridged to ROS 2 using `ros_gz_bridge`.
 
 ---
 
-# 🚀 Build
+# 🛠️ Installation
+
+### 1. Create the Workspace
 
 ```bash
-cd ~/robot_description_ws
+mkdir -p ~/mobile_ws
+cd ~/mobile_ws
+```
 
+### 2. Clone the Repository
+
+```bash
+git clone git@github.com:AhmedGaberAG/Mobile-Robot.git .
+```
+
+### 3. Source ROS 2
+
+```bash
+source /opt/ros/humble/setup.bash
+```
+
+### 4. Build the Workspace
+
+```bash
 colcon build --symlink-install
+```
 
-source install/setup.bash
+### 5. Source the Workspace
+
+```bash
+source ~/mobile_ws/install/setup.bash
+```
+
+### 6. Make Scripts Executable
+
+```bash
+chmod +x src/diff_bot/scripts/*.sh
 ```
 
 ---
@@ -252,14 +319,31 @@ RViz2
 
 ---
 
-# 🧪 Scripts
+# ⚡ Development Scripts
 
-The project includes Bash scripts for common development and validation tasks.
+The project includes Bash scripts for simulation, visualization, teleoperation, and validation.
+
+### Simulation
+
+```bash
+./src/diff_bot/scripts/sim.sh
+```
 
 ### RViz2
 
 ```bash
 ./src/diff_bot/scripts/rviz.sh
+```
+
+The RViz script sources ROS 2 and the workspace before launching the robot description:
+
+```bash
+#!/bin/bash
+
+source /opt/ros/humble/setup.bash
+source ~/mobile_ws/install/setup.bash
+
+ros2 launch ddr_description display.launch.xml
 ```
 
 ### Teleoperation
@@ -282,6 +366,7 @@ The project includes Bash scripts for common development and validation tasks.
 
 These scripts provide quick validation of:
 
+* Robot visualization
 * Robot motion
 * Velocity commands
 * Odometry
@@ -338,7 +423,7 @@ ros2 run tf2_ros tf2_echo odom base_footprint
 
 # 🧠 TF2 Demo
 
-A standalone `tf2_demo` package is included to demonstrate querying transformations between robot frames using `tf2_ros`.
+A standalone `tf2_demo` package demonstrates querying transformations between robot frames using `tf2_ros`.
 
 Example:
 
@@ -350,36 +435,17 @@ laser_link
 
 ---
 
-# 📁 Workspace Structure
+# 📁 Repository Structure
 
 ```text
-robot_description_ws/
+Mobile-Robot/
 │
 ├── media/
-│   ├── ddr.png
-│   ├── ddr_demo.gif
-│   ├── diff.png
-│   ├── diff_cad.png
-│   ├── diff_cad2.png
-│   ├── diff_demo.gif
-│   ├── diff_animation_cad_demo.gif
-│   └── diff_animation_cad.mp4
 │
 └── src/
     ├── ddr_description/
     │
     ├── diff_bot/
-    │   ├── CAD/
-    │   ├── config/
-    │   ├── frames/
-    │   ├── launch/
-    │   ├── meshes/
-    │   ├── models/
-    │   ├── photos/
-    │   ├── rviz/
-    │   ├── scripts/
-    │   ├── urdf/
-    │   └── worlds/
     │
     └── tf2_demo/
 ```
@@ -430,9 +496,25 @@ robot_description_ws/
 
 This repository focuses on the **robot description and simulation layer** of a robotics software stack.
 
-### Covered
-
-**Modeling → CAD → Robot Description → TF2 → Visualization → Simulation → Control → Sensors → Digital Twin**
+```text
+Modeling
+   ↓
+CAD
+   ↓
+Robot Description
+   ↓
+TF2
+   ↓
+Visualization
+   ↓
+Simulation
+   ↓
+Control
+   ↓
+Sensors
+   ↓
+Digital Twin
+```
 
 Higher-level systems such as **SLAM, Navigation, autonomous task planning, and application-level robotics** are outside the scope of this repository.
 
