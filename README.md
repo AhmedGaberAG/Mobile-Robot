@@ -1,21 +1,42 @@
-# ROS 2 Robot Description Workspace
+# ROS 2 Robot Description & Digital Twin
 
-A practical ROS 2 workspace focused on **robot description, simulation, sensors, TF2, and CAD-based digital twins** using URDF, Xacro, RViz2, Gazebo, and ros2_control.
+**From robot modeling and CAD design to a fully simulated ROS 2 digital twin.**
 
-## Demo
+This workspace demonstrates a complete robotics simulation workflow using **ROS 2 Humble, URDF/Xacro, TF2, RViz2, Gazebo Sim, ros2_control, SolidWorks, and simulated sensors.**
 
-![DDR Robot Demo](media/ddr_demo.gif)
+---
 
-**Differential-Drive Robot — Basic Model**
+## 🎥 Project Demo
 
-A complete simulated differential-drive robot with ROS 2 control, Gazebo sensors, TF2, RViz2 visualization, and keyboard teleoperation.
+### DDR — Basic Robot
 
-## Overview
+![DDR Demo](media/ddr_demo.gif)
 
-This workspace is designed to demonstrate the workflow of building a robot from its description to a functional ROS 2 digital twin.
+### Differential-Drive — CAD Digital Twin
+
+![CAD Demo](media/diff_animation_cad_demo.gif)
+
+![CAD Robot](media/diff_cad.png)
+
+![CAD Robot](media/diff_cad2.png)
+
+---
+
+## 🚀 Project Overview
+
+The workspace contains two stages of the same differential-drive robotics workflow:
+
+| Project                    | Description                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| **DDR Basic**              | Primitive-based ROS 2 robot for developing and validating the simulation stack |
+| **Differential-Drive CAD** | SolidWorks-based robot integrated into ROS 2 as a complete digital twin        |
+
+The workflow:
 
 ```text
 CAD / Robot Design
+        ↓
+   Mesh Export
         ↓
     URDF / Xacro
         ↓
@@ -23,63 +44,164 @@ CAD / Robot Design
         ↓
       RViz2
         ↓
-      Gazebo
+    Gazebo Sim
         ↓
    ros2_control
         ↓
-  Sensors & Plugins
+ Sensors + ROS 2 Bridge
         ↓
-    ROS 2 Digital Twin
+   Digital Twin
 ```
 
-## Projects
+---
 
-### 1. Differential-Drive Robot — Basic Model
-
-A complete differential-drive robot built using primitive URDF/Xacro geometries.
+# 🤖 01 — DDR Basic Robot
 
 ![DDR Robot](media/ddr.png)
 
-#### Features
+A primitive-geometry differential-drive robot used to build and validate the ROS 2 robot-description and simulation pipeline.
 
-* URDF / Xacro robot description
-* Modular Xacro properties and macros
+### Features
+
+* URDF / Xacro
+* Modular robot description
 * TF2 frame hierarchy
-* RViz2 visualization
-* Gazebo simulation
+* RViz2
+* Gazebo Sim
 * `ros2_control`
-* Differential-drive controller
-* Wheel friction and contact tuning
-* Odometry and TF publishing
+* `diff_drive_controller`
+* Wheel friction tuning
+* Odometry
 * LiDAR simulation
 * Camera simulation
 * IMU simulation
-* ROS 2 ↔ Gazebo topic bridging
+* ROS 2 ↔ Gazebo bridge
 * Keyboard teleoperation
-* Motion testing scripts
-* Sensor validation scripts
+* Motion testing
+* Sensor validation
 * Multiple Gazebo worlds
 
-### Robot TF Tree
+---
 
-The final TF structure is:
+# 🤖 02 — Differential-Drive CAD Digital Twin
+
+![Differential Drive](media/diff.png)
+
+A complete differential-drive robot designed in **SolidWorks** and integrated into ROS 2.
+
+The CAD model includes the mechanical structure, wheels, motors, sensor mounts, electronics mounting components, and supporting assemblies.
+
+### CAD Components
+
+```text
+diff_bot.SLDASM
+│
+├── Base Assembly
+├── Base Plate
+├── Side Plates
+├── Top Plate
+├── PCB Assembly
+├── PCB Plate
+├── Camera Stand
+├── LiDAR Stand
+├── Motor Adapters
+├── Wheels
+├── DC Motors
+└── Caster Wheels
+```
+
+### CAD → ROS 2
+
+```text
+SolidWorks
+    ↓
+SLDASM / SLDPRT
+    ↓
+Mesh Export
+    ↓
+ROS 2 Meshes
+    ↓
+URDF / Xacro
+    ↓
+Visual + Collision + Inertial
+    ↓
+Gazebo Simulation
+    ↓
+ros2_control
+    ↓
+ROS 2 Digital Twin
+```
+
+---
+
+# 🧩 Robot Description
+
+The CAD robot uses a modular Xacro architecture:
+
+```text
+diff_bot/
+├── CAD/
+├── meshes/
+├── urdf/
+│   ├── diff_bot.urdf.xacro
+│   ├── properties.xacro
+│   ├── gazebo.xacro
+│   ├── ros2_control.xacro
+│   └── diff_bot.csv
+├── config/
+├── launch/
+├── rviz/
+├── scripts/
+├── worlds/
+└── frames/
+```
+
+### Robot Frames
 
 ```text
 odom
 └── base_footprint
     └── base_link
-        ├── right_wheel_link
-        ├── left_wheel_link
-        ├── caster_wheel_link
+        ├── wheel_right_link
+        ├── wheel_left_link
+        ├── caster_wheel_*
         ├── laser_link
         ├── camera_link
         │   └── camera_optical_frame
         └── imu_link
 ```
 
-[View the generated TF2 frame graph](src/ddr_description/frame/frames_ddr.pdf)
+[View TF2 Frame Graph](src/diff_bot/frames/frames.pdf)
 
-### Sensors
+---
+
+# 🎮 Control
+
+The differential-drive robot is controlled through:
+
+```text
+ROS 2
+  ↓
+ros2_control
+  ↓
+diff_drive_controller
+  ↓
+Wheel Velocity Interfaces
+  ↓
+Gazebo
+```
+
+Main command interface:
+
+```text
+/diff_controller/cmd_vel_unstamped
+```
+
+The controller publishes odometry and the `odom → base_footprint` transform.
+
+---
+
+# 📡 Simulated Sensors
 
 | Sensor | ROS 2 Topic     |   Rate |
 | ------ | --------------- | -----: |
@@ -87,130 +209,11 @@ odom
 | Camera | `/camera/image` |  30 Hz |
 | IMU    | `/imu/out`      | 100 Hz |
 
-### Motion Control
+Sensor data is generated in Gazebo and bridged to ROS 2 using `ros_gz_bridge`.
 
-The robot is controlled using `diff_drive_controller`.
+---
 
-The main velocity command interface is:
-
-```text
-/ddr_controller/cmd_vel_unstamped
-```
-
-Keyboard teleoperation is provided through:
-
-```bash
-./src/ddr_description/scripts/teleop.sh
-```
-
-Automated motion testing is available through:
-
-```bash
-./src/ddr_description/scripts/test_motion.sh
-```
-
-### Sensor Testing
-
-Sensor publishing rates can be checked using:
-
-```bash
-./src/ddr_description/scripts/test_sensors.sh
-```
-
-## Package Structure
-
-```text
-robot_description_ws/
-├── media/
-│   ├── ddr.png
-│   └── ddr_demo.gif
-│
-├── src/
-│   ├── ddr_description/
-│   │   ├── config/
-│   │   │   ├── ddr_controllers.yaml
-│   │   │   └── gz_bridge.yaml
-│   │   │
-│   │   ├── frame/
-│   │   │   ├── frames_ddr.gv
-│   │   │   └── frames_ddr.pdf
-│   │   │
-│   │   ├── launch/
-│   │   │   ├── display.launch.py
-│   │   │   ├── display.launch.xml
-│   │   │   └── gazebo.launch.py
-│   │   │
-│   │   ├── models/
-│   │   ├── photos/
-│   │   ├── rviz/
-│   │   │   └── ddr_robot_description.rviz
-│   │   │
-│   │   ├── scripts/
-│   │   │   ├── rviz.sh
-│   │   │   ├── teleop.sh
-│   │   │   ├── test_motion.sh
-│   │   │   └── test_sensors.sh
-│   │   │
-│   │   ├── urdf/
-│   │   │   ├── ddr_robot.urdf.xacro
-│   │   │   ├── gazebo.xacro
-│   │   │   ├── properties.xacro
-│   │   │   └── ros2_control.xacro
-│   │   │
-│   │   ├── worlds/
-│   │   │   ├── empty.world
-│   │   │   ├── small_house.world
-│   │   │   └── small_warehouse.world
-│   │   │
-│   │   ├── CMakeLists.txt
-│   │   └── package.xml
-│   │
-│   └── tf2_demo/
-│       ├── tf2_demo/
-│       │   ├── __init__.py
-│       │   └── tf2_listener.py
-│       ├── resource/
-│       ├── test/
-│       ├── package.xml
-│       ├── setup.cfg
-│       └── setup.py
-│
-├── .gitignore
-└── README.md
-```
-
-## TF2 Demo
-
-The workspace also contains a small standalone TF2 listener package.
-
-It demonstrates how to query a transform between two frames using `tf2_ros`.
-
-Example:
-
-```text
-base_link
-    ↓
-laser_link
-```
-
-The listener reports both translation and rotation:
-
-```text
-Translation:
-x = ...
-y = ...
-z = ...
-
-Rotation:
-x = ...
-y = ...
-z = ...
-w = ...
-```
-
-## Running the Simulation
-
-Build the workspace:
+# 🚀 Build
 
 ```bash
 cd ~/robot_description_ws
@@ -220,142 +223,247 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-Launch the DDR simulation:
+---
+
+# ▶️ Launch
+
+## DDR Basic
 
 ```bash
 ros2 launch ddr_description gazebo.launch.py
 ```
 
+## CAD Robot
+
+```bash
+ros2 launch diff_bot gazebo.launch.py
+```
+
+### Select a World
+
+```bash
+ros2 launch diff_bot gazebo.launch.py world_name:=empty
+```
+
+```bash
+ros2 launch diff_bot gazebo.launch.py world_name:=small_house
+```
+
+```bash
+ros2 launch diff_bot gazebo.launch.py world_name:=small_warehouse
+```
+
+The CAD launch file starts the complete simulation stack:
+
+```text
+Gazebo Sim
+    +
+Robot State Publisher
+    +
+Robot Spawn
+    +
+ros_gz_bridge
+    +
+Joint State Broadcaster
+    +
+Diff Drive Controller
+    +
+RViz2
+```
+
+---
+
+# 🧪 Scripts
+
+The project includes Bash scripts for common development and validation tasks.
+
 ### RViz2
 
 ```bash
-./src/ddr_description/scripts/rviz.sh
+./src/diff_bot/scripts/rviz.sh
 ```
 
-### Keyboard Teleoperation
+### Teleoperation
 
 ```bash
-./src/ddr_description/scripts/teleop.sh
+./src/diff_bot/scripts/teleop.sh
 ```
 
 ### Motion Test
 
 ```bash
-./src/ddr_description/scripts/test_motion.sh
+./src/diff_bot/scripts/test_motion.sh
 ```
 
 ### Sensor Test
 
 ```bash
-./src/ddr_description/scripts/test_sensors.sh
+./src/diff_bot/scripts/test_sensors.sh
 ```
 
-## Useful ROS 2 Commands
+These scripts provide quick validation of:
 
-Check active topics:
+* Robot motion
+* Velocity commands
+* Odometry
+* LiDAR publishing
+* Camera publishing
+* IMU publishing
+* Sensor update rates
+
+---
+
+# 🔍 ROS 2 Inspection
+
+### Topics
 
 ```bash
 ros2 topic list
 ```
 
-Check LiDAR:
+### Controllers
+
+```bash
+ros2 control list_controllers
+```
+
+### LiDAR
 
 ```bash
 ros2 topic hz /scan
 ```
 
-Check camera:
+### Camera
 
 ```bash
 ros2 topic hz /camera/image
 ```
 
-Check IMU:
+### IMU
 
 ```bash
 ros2 topic hz /imu/out
 ```
 
-Inspect TF:
+### TF2
 
 ```bash
 ros2 run tf2_tools view_frames
 ```
 
-Inspect the transform between two frames:
-
 ```bash
 ros2 run tf2_ros tf2_echo odom base_footprint
 ```
 
-## Technologies
+---
+
+# 🧠 TF2 Demo
+
+A standalone `tf2_demo` package is included to demonstrate querying transformations between robot frames using `tf2_ros`.
+
+Example:
+
+```text
+base_link
+    ↓
+laser_link
+```
+
+---
+
+# 📁 Workspace Structure
+
+```text
+robot_description_ws/
+│
+├── media/
+│   ├── ddr.png
+│   ├── ddr_demo.gif
+│   ├── diff.png
+│   ├── diff_cad.png
+│   ├── diff_cad2.png
+│   ├── diff_demo.gif
+│   ├── diff_animation_cad_demo.gif
+│   └── diff_animation_cad.mp4
+│
+└── src/
+    ├── ddr_description/
+    │
+    ├── diff_bot/
+    │   ├── CAD/
+    │   ├── config/
+    │   ├── frames/
+    │   ├── launch/
+    │   ├── meshes/
+    │   ├── models/
+    │   ├── photos/
+    │   ├── rviz/
+    │   ├── scripts/
+    │   ├── urdf/
+    │   └── worlds/
+    │
+    └── tf2_demo/
+```
+
+---
+
+# 🛠️ Technology Stack
 
 * **ROS 2 Humble**
-* **URDF**
-* **Xacro**
+* **URDF / Xacro**
 * **TF2**
 * **RViz2**
 * **Gazebo Sim**
 * **ros2_control**
 * **diff_drive_controller**
 * **ros_gz_bridge**
+* **SolidWorks**
 * **LiDAR**
 * **Camera**
 * **IMU**
 * **Python**
 * **Bash**
 
-## Repository Scope
+---
+
+# 📊 Project Status
+
+| Component                  | Status |
+| -------------------------- | :----: |
+| DDR Basic Robot            |    ✅   |
+| URDF / Xacro               |    ✅   |
+| TF2                        |    ✅   |
+| RViz2                      |    ✅   |
+| Gazebo Simulation          |    ✅   |
+| ros2_control               |    ✅   |
+| Differential-Drive Control |    ✅   |
+| Sensor Simulation          |    ✅   |
+| ROS 2 ↔ Gazebo Bridge      |    ✅   |
+| SolidWorks CAD             |    ✅   |
+| CAD → ROS 2 Integration    |    ✅   |
+| CAD Digital Twin           |    ✅   |
+| Motion Testing             |    ✅   |
+| Sensor Testing             |    ✅   |
+
+---
+
+# 🎯 Scope
 
 This repository focuses on the **robot description and simulation layer** of a robotics software stack.
 
-The main areas are:
+### Covered
 
-* Robot modeling
-* URDF and Xacro
-* Coordinate frames and TF2
-* Visualization
-* Physics simulation
-* Robot controllers
-* Sensor simulation
-* Gazebo–ROS 2 integration
-* CAD-to-ROS workflows
-* Digital twins
+**Modeling → CAD → Robot Description → TF2 → Visualization → Simulation → Control → Sensors → Digital Twin**
 
-Higher-level systems such as SLAM, Navigation, autonomous task planning, and application-level robotics are outside the primary scope of this repository.
+Higher-level systems such as **SLAM, Navigation, autonomous task planning, and application-level robotics** are outside the scope of this repository.
 
-## Roadmap
+---
 
-| Project                   | Status      |
-| ------------------------- | ----------- |
-| DDR — Basic Model         | ✅ Completed |
-| DDR — CAD Model           | 🚧 Next     |
-| Manipulator — Basic Model | 📋 Planned  |
-| Manipulator — CAD Model   | 📋 Planned  |
-
-### Upcoming: DDR CAD Model
-
-The next stage is to replace the primitive robot geometry with a CAD-based model and demonstrate the complete CAD-to-ROS workflow:
-
-```text
-SolidWorks
-    ↓
-CAD Model
-    ↓
-Mesh Export
-    ↓
-ROS 2 Meshes
-    ↓
-Xacro Integration
-    ↓
-Visual + Collision + Inertial
-    ↓
-Gazebo Digital Twin
-```
-
-## Author
+# 👨‍💻 Author
 
 **Ahmed Gaber**
 
 Mechatronics Engineer | Robotics Software Engineer
+
+**ROS 2 • C++ • Python • Embedded Systems • Robotics • AI**
 
