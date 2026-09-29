@@ -335,17 +335,6 @@ The project includes Bash scripts for simulation, visualization, teleoperation, 
 ./src/diff_bot/scripts/rviz.sh
 ```
 
-The RViz script sources ROS 2 and the workspace before launching the robot description:
-
-```bash
-#!/bin/bash
-
-source /opt/ros/humble/setup.bash
-source ~/mobile_ws/install/setup.bash
-
-ros2 launch ddr_description display.launch.xml
-```
-
 ### Teleoperation
 
 ```bash
