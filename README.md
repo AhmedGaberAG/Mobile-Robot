@@ -14,11 +14,9 @@ This workspace demonstrates a complete robotics simulation workflow using **ROS 
 
 ### Differential-Drive — CAD Digital Twin
 
+![DDR Demo](media/diff_demo.gif)
+
 ![CAD Demo](media/diff_animation_cad_demo.gif)
-
-![CAD Robot](media/diff_cad.png)
-
-![CAD Robot](media/diff_cad2.png)
 
 ---
 
